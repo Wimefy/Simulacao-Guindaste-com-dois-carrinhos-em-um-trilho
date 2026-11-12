@@ -1,0 +1,212 @@
+============================================================================================
+ PME3380 - MODELAGEM DE SISTEMAS DINÂMICOS (POLI-USP)
+ ANÁLISE DE EQUILÍBRIO E LINEARIZAÇÃO DO GUINDASTE 2D COM DOIS TROLLEYS
+============================================================================================
+
+1. DEMONSTRAÇÃO EXPLÍCITA DO PONTO DE EQUILÍBRIO ESTÁTICO (f(x_eq, u_eq, w_eq) = 0)
+--------------------------------------------------------------------------------------------
+  Massa total suspensa M = m_p + m_c = 2950.00 kg
+  Momento de inércia baricêntrico I_G = 5516.6667 kg.m^2
+  Tração estática em cada cabo T1_eq = T2_eq = (m_p + m_c)*g/2 = 14469.7500 N
+  Alongamento estático de cada cabo delta_l_eq = T_eq / k = 57.8790 mm
+
+  Vetor de Estados de Equilíbrio x_eq:
+        x1_eq =    10.000000 [m]
+       dx1_eq =     0.000000 [m/s]
+        x2_eq =    16.000000 [m]
+       dx2_eq =     0.000000 [m/s]
+       x_p_eq =    13.000000 [m]
+      dx_p_eq =     0.000000 [m/s]
+       y_p_eq =    15.057879 [m]
+      dy_p_eq =     0.000000 [m/s]
+       phi_eq =     0.000000 [rad]
+      dphi_eq =     0.000000 [rad/s]
+
+  Entradas de Equilíbrio: u_eq = [0.0, 0.0] [N], w_eq = [0.0] [m/s]
+  Saídas de Equilíbrio:   y_eq = [0.0, 0.0, 0.0, 0.0, 13.0, 15.057879, 0.0]
+  Norma infinita do resíduo ||f(x_eq, u_eq, w_eq)||_inf = 3.553e-14 (Exatamente ZERO!)
+
+2. EXPRESSÕES ANALÍTICAS SIMBÓLICAS NÃO-NULAS DA MATRIZ JACOBIANA A
+--------------------------------------------------------------------------------------------
+  A[ 1, 2] (d(x1)'/d(dx1)) = 1
+  A[ 2, 1] (d(dx1)'/d(x1)) = -g*k*(m_c + m_p)/(m_T*(2*L_s*k + g*(m_c + m_p)))
+  A[ 2, 2] (d(dx1)'/d(dx1)) = (-b_T - 50*g*mu_T*(2*m_T + m_c + m_p))/m_T
+  A[ 2, 5] (d(dx1)'/d(x_p)) = g*k*(m_c + m_p)/(m_T*(2*L_s*k + g*(m_c + m_p)))
+  A[ 3, 4] (d(x2)'/d(dx2)) = 1
+  A[ 4, 3] (d(dx2)'/d(x2)) = -g*k*(m_c + m_p)/(m_T*(2*L_s*k + g*(m_c + m_p)))
+  A[ 4, 4] (d(dx2)'/d(dx2)) = (-b_T - 50*g*mu_T*(2*m_T + m_c + m_p))/m_T
+  A[ 4, 5] (d(dx2)'/d(x_p)) = g*k*(m_c + m_p)/(m_T*(2*L_s*k + g*(m_c + m_p)))
+  A[ 5, 6] (d(x_p)'/d(dx_p)) = 1
+  A[ 6, 1] (d(dx_p)'/d(x1)) = g*k/(2*L_s*k + g*(m_c + m_p))
+  A[ 6, 3] (d(dx_p)'/d(x2)) = g*k/(2*L_s*k + g*(m_c + m_p))
+  A[ 6, 5] (d(dx_p)'/d(x_p)) = -2*g*k/(2*L_s*k + g*(m_c + m_p))
+  A[ 7, 8] (d(y_p)'/d(dy_p)) = 1
+  A[ 8, 7] (d(dy_p)'/d(y_p)) = -2*k/(m_c + m_p)
+  A[ 8, 8] (d(dy_p)'/d(dy_p)) = -2*c_s/(m_c + m_p)
+  A[ 9,10] (d(phi)'/d(dphi)) = 1
+  A[10, 9] (d(dphi)'/d(phi)) = -L_p**2*k/(2*I_G)
+  A[10,10] (d(dphi)'/d(dphi)) = -L_p**2*c_s/(2*I_G)
+
+3A. MODOS PUROS DO SISTEMA LINEARIZADO (Sem Atrito Seco: mu_T = 0)
+--------------------------------------------------------------------------------------------
+ # |         Autovalor (s^-1) | wn [rad/s] |  fn [Hz] | zeta [-] | Modo Físico Dominante
+--------------------------------------------------------------------------------------------
+ 1 |     +0.00000   +0.00000j |     0.0000 |   0.0000 |   0.0000 | Translação Rígida Livre (Integrador s = 0)
+ 2 |     -0.08289   +0.00000j |     0.0829 |   0.0132 |   1.0000 | Translação Global Amortecida no Trilho
+ 3 |     -0.21429   +1.64306j |     1.6570 |   0.2637 |   0.1293 | Diferencial Antissimétrico dos Trolleys (x1 - x2)
+ 4 |     -0.21429   -1.64306j |     1.6570 |   0.2637 |   0.1293 | Diferencial Antissimétrico dos Trolleys (x1 - x2)
+ 5 |     -0.17284   +1.82716j |     1.8353 |   0.2921 |   0.0942 | Balanço Pendular Simétrico Acoplado (Trolleys + Carga)
+ 6 |     -0.17284   -1.82716j |     1.8353 |   0.2921 |   0.0942 | Balanço Pendular Simétrico Acoplado (Trolleys + Carga)
+ 7 |     -0.40678  +13.01253j |    13.0189 |   2.0720 |   0.0312 | Elástico Axial Vertical dos Cabos (Bounce y_p)
+ 8 |     -0.40678  -13.01253j |    13.0189 |   2.0720 |   0.0312 | Elástico Axial Vertical dos Cabos (Bounce y_p)
+ 9 |     -1.95770  +28.49346j |    28.5606 |   4.5456 |   0.0685 | Arfagem / Rotação da Plataforma (Pitch phi)
+10 |     -1.95770  -28.49346j |    28.5606 |   4.5456 |   0.0685 | Arfagem / Rotação da Plataforma (Pitch phi)
+
+3B. MODOS COM ATRITO DE COULOMB REGULARIZADO LINEARIZADO (mu_T = 0.015)
+--------------------------------------------------------------------------------------------
+ # |         Autovalor (s^-1) | wn [rad/s] |  fn [Hz] | zeta [-] | Modo Físico Dominante
+--------------------------------------------------------------------------------------------
+ 1 |     +0.00000   +0.00000j |     0.0000 |   0.0000 |   0.0000 | Translação Rígida Livre (Integrador s = 0)
+ 2 |     -0.03560   +0.00000j |     0.0356 |   0.0057 |   1.0000 | Translação Global Amortecida no Trilho
+ 3 |     -0.01780   +0.80714j |     0.8073 |   0.1285 |   0.0220 | Balanço Pendular Simples (Trolleys Quase-Fixos pelo Atrito)
+ 4 |     -0.01780   -0.80714j |     0.8073 |   0.1285 |   0.0220 | Balanço Pendular Simples (Trolleys Quase-Fixos pelo Atrito)
+ 5 |     -0.40678  +13.01253j |    13.0189 |   2.0720 |   0.0312 | Elástico Axial Vertical dos Cabos (Bounce y_p)
+ 6 |     -0.40678  -13.01253j |    13.0189 |   2.0720 |   0.0312 | Elástico Axial Vertical dos Cabos (Bounce y_p)
+ 7 |     -1.95770  +28.49346j |    28.5606 |   4.5456 |   0.0685 | Arfagem / Rotação da Plataforma (Pitch phi)
+ 8 |     -1.95770  -28.49346j |    28.5606 |   4.5456 |   0.0685 | Arfagem / Rotação da Plataforma (Pitch phi)
+ 9 |    -77.12119   +0.00000j |    77.1212 |  12.2742 |   1.0000 | Relaxação Rápida de Velocidade dos Trolleys (Atrito)
+10 |    -77.12119   +0.00000j |    77.1212 |  12.2742 |   1.0000 | Relaxação Rápida de Velocidade dos Trolleys (Atrito)
+
+4. POLINÔMIO CARACTERÍSTICO E TABELA DE ROUTH-HURWITZ
+--------------------------------------------------------------------------------------------
+  Nota Física Importante: O sistema completo de 10ª ordem possui 1 polo em s = 0
+  correspondente à translação horizontal de corpo rígido ao longo do trilho
+  (invariância espacial: deslocar x1, x2 e x_p por +Delta_x preserva o equilíbrio).
+  Fatorando P_10(s) = s * Q_9(s), analisamos a estabilidade de Routh-Hurwitz de Q_9(s):
+
+  >>> Caso 1: Modos Puros (mu_T = 0) <<<
+  Q_9(s) = 1.0000e+00*s^9 + 5.5861e+00*s^8 + 9.9877e+02*s^7 + 2.2073e+03*s^6 + 1.4567e+05*s^5 + 1.2983e+05*s^4 + 8.8785e+05*s^3 + 4.1586e+05*s^2 + 1.3070e+06*s^1 + 1.0598e+05*s^0
+---------------------------------------------------------------------------------------------
+   Grau  |       Coluna 1 |       Coluna 2 |       Coluna 3 |       Coluna 4 |       Coluna 5
+---------------------------------------------------------------------------------------------
+     s^9 |     1.0000e+00 |     9.9877e+02 |     1.4567e+05 |     8.8785e+05 |     1.3070e+06
+     s^8 |     5.5861e+00 |     2.2073e+03 |     1.2983e+05 |     4.1586e+05 |     1.0598e+05
+     s^7 |     6.0363e+02 |     1.2243e+05 |     8.1340e+05 |     1.2881e+06 |     0.0000e+00
+     s^6 |     1.0743e+03 |     1.2230e+05 |     4.0394e+05 |     1.0598e+05 |     0.0000e+00
+     s^5 |     5.3712e+04 |     5.8643e+05 |     1.2285e+06 |     0.0000e+00 |     0.0000e+00
+     s^4 |     1.1057e+05 |     3.7937e+05 |     1.0598e+05 |     0.0000e+00 |     0.0000e+00
+     s^3 |     4.0214e+05 |     1.1770e+06 |     0.0000e+00 |     0.0000e+00 |     0.0000e+00
+     s^2 |     5.5749e+04 |     1.0598e+05 |     0.0000e+00 |     0.0000e+00 |     0.0000e+00
+     s^1 |     4.1252e+05 |     0.0000e+00 |     0.0000e+00 |     0.0000e+00 |     0.0000e+00
+     s^0 |     1.0598e+05 |     0.0000e+00 |     0.0000e+00 |     0.0000e+00 |     0.0000e+00
+---------------------------------------------------------------------------------------------
+  Todos os elementos da 1ª coluna são estritamente positivos? SIM (Sistema Internamente Assintoticamente Estável!)
+
+  >>> Caso 2: Com Atrito Linearizado (mu_T = 0.015) <<<
+  Q_9(s) = 1.0000e+00*s^9 + 1.5904e+02*s^8 + 7.6774e+03*s^7 + 1.8255e+05*s^6 + 6.2395e+06*s^5 + 2.9781e+07*s^4 + 8.2845e+08*s^3 + 7.7771e+07*s^2 + 5.3769e+08*s^1 + 1.9081e+07*s^0
+---------------------------------------------------------------------------------------------
+   Grau  |       Coluna 1 |       Coluna 2 |       Coluna 3 |       Coluna 4 |       Coluna 5
+---------------------------------------------------------------------------------------------
+     s^9 |     1.0000e+00 |     7.6774e+03 |     6.2395e+06 |     8.2845e+08 |     5.3769e+08
+     s^8 |     1.5904e+02 |     1.8255e+05 |     2.9781e+07 |     7.7771e+07 |     1.9081e+07
+     s^7 |     6.5296e+03 |     6.0523e+06 |     8.2796e+08 |     5.3757e+08 |     0.0000e+00
+     s^6 |     3.5138e+04 |     9.6142e+06 |     6.4678e+07 |     1.9081e+07 |     0.0000e+00
+     s^5 |     4.2657e+06 |     8.1594e+08 |     5.3402e+08 |     0.0000e+00 |     0.0000e+00
+     s^4 |     2.8930e+06 |     6.0279e+07 |     1.9081e+07 |     0.0000e+00 |     0.0000e+00
+     s^3 |     7.2706e+08 |     5.0589e+08 |     0.0000e+00 |     0.0000e+00 |     0.0000e+00
+     s^2 |     5.8266e+07 |     1.9081e+07 |     0.0000e+00 |     0.0000e+00 |     0.0000e+00
+     s^1 |     2.6779e+08 |     0.0000e+00 |     0.0000e+00 |     0.0000e+00 |     0.0000e+00
+     s^0 |     1.9081e+07 |     0.0000e+00 |     0.0000e+00 |     0.0000e+00 |     0.0000e+00
+---------------------------------------------------------------------------------------------
+  Todos os elementos da 1ª coluna são estritamente positivos? SIM (Sistema Internamente Assintoticamente Estável!)
+
+5. FUNÇÕES DE TRANSFERÊNCIA PRINCIPAIS (REALIZAÇÃO MÍNIMA EXATA - mu_T = 0)
+--------------------------------------------------------------------------------------------
+
+  Canal: theta1_FM1
+<TransferFunction>: sys[0]
+Inputs (1): ['u[0]']
+Outputs (1): ['y[0]']
+
+   -0.0001897 s^3 - 8.132e-05 s^2 - 0.0005828 s - 2.649e-05
+  -----------------------------------------------------------
+  s^5 + 0.8571 s^4 + 6.326 s^3 + 2.912 s^2 + 9.446 s + 0.7666
+  Polos (5): -0.1728+1.8272j, -0.1728-1.8272j, -0.2143+1.6431j, -0.2143-1.6431j, -0.0829+0.0000j
+  Zeros (3): -0.1914+1.7370j, -0.1914-1.7370j, -0.0457+0.0000j
+
+  Canal: theta2_FM1
+<TransferFunction>: sys[1]
+Inputs (1): ['u[0]']
+Outputs (1): ['y[0]']
+
+                    6.181e-05 s + 2.649e-05
+  -----------------------------------------------------------
+  s^5 + 0.8571 s^4 + 6.326 s^3 + 2.912 s^2 + 9.446 s + 0.7666
+  Polos (5): -0.1728+1.8272j, -0.1728-1.8272j, -0.2143+1.6431j, -0.2143-1.6431j, -0.0829+0.0000j
+  Zeros (1): -0.4286+0.0000j
+
+  Canal: theta1_F_sinc
+<TransferFunction>: sys[2]
+Inputs (1): ['u[0]']
+Outputs (1): ['y[0]']
+
+             -0.0001897 s
+  -----------------------------------
+  s^3 + 0.4286 s^2 + 3.397 s + 0.2792
+  Polos (3): -0.1728+1.8272j, -0.1728-1.8272j, -0.0829+0.0000j
+  Zeros (1): +0.0000+0.0000j
+
+  Canal: x_p_FM1
+<TransferFunction>: sys[3]
+Inputs (1): ['u[0]']
+Outputs (1): ['y[0]']
+
+                 0.0009307
+  ---------------------------------------
+  s^4 + 0.4286 s^3 + 3.397 s^2 + 0.2792 s
+  Polos (4): -0.1728+1.8272j, -0.1728-1.8272j, -0.0829+0.0000j, +0.0000+0.0000j
+  Zeros (0): 
+
+  Canal: x_p_F_sinc
+<TransferFunction>: sys[4]
+Inputs (1): ['u[0]']
+Outputs (1): ['y[0]']
+
+                 0.001861
+  ---------------------------------------
+  s^4 + 0.4286 s^3 + 3.397 s^2 + 0.2792 s
+  Polos (4): -0.1728+1.8272j, -0.1728-1.8272j, -0.0829+0.0000j, +0.0000+0.0000j
+  Zeros (0): 
+
+  Canal: theta1_Vv_nom
+<TransferFunction>: sys[5]
+Inputs (1): ['u[0]']
+Outputs (1): ['y[0]']
+
+         0.002537 s + 0.001087
+  -----------------------------------
+  s^3 + 0.4286 s^2 + 3.397 s + 0.2792
+  Polos (3): -0.1728+1.8272j, -0.1728-1.8272j, -0.0829+0.0000j
+  Zeros (1): -0.4286+0.0000j
+
+  Canal: phi_Vv_nom
+<TransferFunction>: sys[6]
+Inputs (1): ['u[0]']
+Outputs (1): ['y[0]']
+
+        -0.02043
+  ---------------------
+  s^2 + 3.915 s + 815.7
+  Polos (2): -1.9577+28.4935j, -1.9577-28.4935j
+  Zeros (0): 
+
+  Canal: x_p_Vv_nom
+<TransferFunction>: sys[7]
+Inputs (1): ['u[0]']
+Outputs (1): ['y[0]']
+
+      0.0382 s^2 + 0.01637 s + 0.1049
+  ---------------------------------------
+  s^4 + 0.4286 s^3 + 3.397 s^2 + 0.2792 s
+  Polos (4): -0.1728+1.8272j, -0.1728-1.8272j, -0.0829+0.0000j, +0.0000+0.0000j
+  Zeros (2): -0.2143+1.6431j, -0.2143-1.6431j
