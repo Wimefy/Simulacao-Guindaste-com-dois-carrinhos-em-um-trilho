@@ -20,9 +20,12 @@ from typing import Any, Dict
 
 # Diretórios padrão de saída de artefatos para os slides e relatório PME3380
 BASE_DIR = Path(__file__).resolve().parent
-MPL_CACHE_DIR = BASE_DIR / ".mplconfig"
-MPL_CACHE_DIR.mkdir(parents=True, exist_ok=True)
-os.environ.setdefault("MPLCONFIGDIR", str(MPL_CACHE_DIR))
+if "MPLCONFIGDIR" not in os.environ:
+    MPL_CACHE_DIR = BASE_DIR / ".mplconfig"
+    MPL_CACHE_DIR.mkdir(parents=True, exist_ok=True)
+    os.environ["MPLCONFIGDIR"] = str(MPL_CACHE_DIR)
+else:
+    Path(os.environ["MPLCONFIGDIR"]).mkdir(parents=True, exist_ok=True)
 
 OUTPUT_DIR = BASE_DIR / "outputs"
 FIGURES_DIR = OUTPUT_DIR / "figures"

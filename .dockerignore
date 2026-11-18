@@ -1,0 +1,9 @@
+.git/
+.gitignore
+.venv/
+.mplconfig/
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+outputs/

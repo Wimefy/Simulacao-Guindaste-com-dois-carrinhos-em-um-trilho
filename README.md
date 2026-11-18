@@ -29,23 +29,103 @@ O sistema consiste em um guindaste de torre plano (2D) cujo trilho horizontal si
 | [`plots.py`](plots.py) | Geração de gráficos científicos em alta resolução (300 DPI `.png` e `.pdf` vetorial) formatados para slides da apresentação PME3380. |
 | [`animation.py`](animation.py) | Animação 2D fisicamente rica (`FuncAnimation`) com torre e lança treliçadas, contrapeso, 2 trolleys com rodas, cabos coloridos pela tração, plataforma + carga rotacionando por $\phi(t)$, setas dinâmicas de forças dos motores e vento, HUD de telemetria e painel lateral sincronizado. |
 | [`main.py`](main.py) | Script principal que executa todo o pipeline e exporta relatórios, tabelas LaTeX, figuras e vídeos (`.mp4` e `.gif`). |
+| [`Dockerfile`](Dockerfile) | Receita para construir a imagem Docker com Python 3.12, `ffmpeg` e todas as dependências científicas. |
+| [`requirements.txt`](requirements.txt) | Lista de bibliotecas Python necessárias para o projeto. |
+| [`.dockerignore`](.dockerignore) | Arquivos ignorados ao construir a imagem Docker (como `.git`, `.venv` e `outputs`). |
 
 ---
 
-## 3. Como Executar
+## 3. Como Executar com Docker (Recomendado para Outros Computadores)
 
-Utilizando o ambiente virtual `.venv` configurado no projeto:
+Usando Docker, não é necessário instalar Python, bibliotecas científicas ou `ffmpeg` manualmente na máquina.
+
+### Pré-requisito
+- Ter o **Docker** (Docker Desktop no Windows/macOS ou Docker Engine no Linux) instalado e em execução.
+
+### Passo a passo após baixar do GitHub
+
+1. **Baixe o projeto do GitHub e entre na pasta:**
+   ```bash
+   git clone https://github.com/Wimefy/Simula-o-Guindaste-com-dois-carrinhos-em-um-trilho.git
+   cd Simula-o-Guindaste-com-dois-carrinhos-em-um-trilho
+   ```
+   *(Se você baixou como arquivo `.zip` pelo navegador, extraia o arquivo e abra o terminal dentro da pasta extraída.)*
+
+2. **Construa a imagem Docker:**
+   ```bash
+   docker build -t guindaste-pme3380 .
+   ```
+   *(Esse passo baixa o Python 3.12, o `ffmpeg` e as dependências de `requirements.txt`. Só precisa ser feito na primeira vez ou quando você alterar o código/dependências.)*
+
+3. **Crie a pasta de saída e execute o container:**
+
+   Montamos a pasta local `outputs/` dentro do container (`/app/outputs`) para que todos os gráficos, tabelas e vídeos gerados fiquem salvos diretamente no seu computador.
+
+   - **Linux / macOS:**
+     ```bash
+     mkdir -p outputs
+     docker run --rm --user "$(id -u):$(id -g)" -v "$(pwd)/outputs:/app/outputs" guindaste-pme3380
+     ```
+     *(A flag `--user "$(id -u):$(id -g)"` no Linux garante que os arquivos gerados pertençam ao seu usuário e não ao `root`.)*
+
+   - **Windows (PowerShell):**
+     ```powershell
+     mkdir outputs -Force
+     docker run --rm -v "${PWD}\outputs:/app/outputs" guindaste-pme3380
+     ```
+
+   - **Windows (Prompt de Comando / CMD):**
+     ```cmd
+     if not exist outputs mkdir outputs
+     docker run --rm -v "%cd%\outputs:/app/outputs" guindaste-pme3380
+     ```
+
+4. **Variações úteis ao rodar o container:**
+
+   Como o `ENTRYPOINT` da imagem já executa `python main.py`, basta passar os argumentos no final do comando `docker run`:
+
+   ```bash
+   # Execução rápida (pula a renderização dos vídeos .mp4/.gif; gera análise, tabelas e gráficos):
+   docker run --rm -v "$(pwd)/outputs:/app/outputs" guindaste-pme3380 --no-anim
+
+   # Renderizar animação apenas do Cenário 3 (com passo de frames menor = vídeo mais fluido):
+   docker run --rm -v "$(pwd)/outputs:/app/outputs" guindaste-pme3380 --scenario cenario3 --stride 3
+
+   # Rodar apenas a análise linear/Routh-Hurwitz no terminal:
+   docker run --rm --entrypoint python -v "$(pwd)/outputs:/app/outputs" guindaste-pme3380 analysis_linear.py
+
+   # Testar alterações em config.py sem precisar refazer o docker build:
+   docker run --rm -v "$(pwd)/outputs:/app/outputs" -v "$(pwd)/config.py:/app/config.py" guindaste-pme3380 --no-anim
+   ```
+
+> **Observação:** No container Docker, o Matplotlib roda em modo *headless* (`MPLBACKEND=Agg`), portanto a opção `--show` não abre janela gráfica. Os resultados (`.png`, `.pdf`, `.mp4`, `.gif`, `.txt`, `.tex`) ficam disponíveis na pasta `outputs/` do seu computador para visualização normal.
+
+---
+
+## 4. Como Executar Localmente (Sem Docker)
+
+Caso prefira rodar diretamente com Python e um ambiente virtual local (`.venv`):
 
 ```bash
+python3 -m venv .venv
+source .venv/bin/activate        # No Windows PowerShell: .venv\Scripts\Activate.ps1
+pip install -r requirements.txt  # (opcional: pip install pyqt6 para usar --show)
+
 # Executar todo o pipeline (linearização, Routh-Hurwitz, 3 cenários, gráficos e animações MP4/GIF):
-.venv/bin/python main.py
+python main.py
 
 # Executar apenas análise linear, simulações e gráficos estáticos (sem renderizar vídeos):
-.venv/bin/python main.py --no-anim
+python main.py --no-anim
 
-# Executar e abrir janela interativa com a animação de um cenário específico:
-.venv/bin/python main.py --scenario cenario3 --show
+# Executar e abrir janela interativa com a animação de um cenário específico (requer PyQt6/Tk):
+python main.py --scenario cenario3 --show
 ```
+
+*(Nota: para exportar vídeos `.mp4` localmente sem Docker, também é necessário ter o `ffmpeg` instalado no sistema.)*
+
+---
+
+## 5. Saídas Geradas
 
 Todos os resultados são exportados automaticamente em:
 - `outputs/tables/` — Relatório completo da linearização (`relatorio_linearizacao.txt`) e tabelas em LaTeX (`tabelas_latex_pme3380.tex`);
